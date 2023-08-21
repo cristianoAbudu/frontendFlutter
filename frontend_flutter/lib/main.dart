@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'dart:html' as html;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -80,12 +80,14 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
+List<Colaborador>? colaboradorList;
 
 class _MyHomePageState extends State<MyHomePage> {
+  final GlobalKey<_DropdownButtonExampleState> _key = GlobalKey();
+
   int _counter = 0;
   String? _nome;
   String? _senha;
-  List<Colaborador>? colaboradorList;
 
   final nomeController = TextEditingController();
   final senhaController = TextEditingController();
@@ -109,11 +111,13 @@ class _MyHomePageState extends State<MyHomePage> {
     post(_nome!, _senha!, this);
     _counter = 0;
   }
+  var dropdown =  const DropdownButtonExample();
 
   @override
   Widget build(BuildContext context) {
     
     carregaLista();
+
 
     return Scaffold(
       appBar: AppBar(
@@ -156,6 +160,20 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: _salvar,
               child: Text('Salvar'),
             ),
+            Expanded(
+              child: ListView.builder(
+                  itemCount: colaboradorList?.length,
+                  itemBuilder: (context, index) {
+                    final item = colaboradorList?[index];
+                    if(item!=null){
+                      return ListTile(
+                        title: Text(item!.nome)
+                      );
+                    }
+                  },
+              )
+            ),
+            dropdown,
           ],
         ),
       ),
@@ -180,8 +198,54 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void lista(List<Colaborador> lista){
-    colaboradorList = lista;
+    setState(() => colaboradorList = lista);
+    _key.currentState?.atualizar();
   }
+}
+
+class DropdownButtonExample extends StatefulWidget {
+
+  const DropdownButtonExample({super.key});
+
+  @override
+  State<DropdownButtonExample> createState() => _DropdownButtonExampleState();
+  
+
+}
+
+class _DropdownButtonExampleState extends State<DropdownButtonExample> {
+  Colaborador? colaborador = colaboradorList?.first;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<Colaborador>(
+      value: colaborador,
+      icon: const Icon(Icons.arrow_downward),
+      elevation: 16,
+      style: const TextStyle(color: Colors.deepPurple),
+      underline: Container(
+        height: 2,
+        color: Colors.deepPurpleAccent,
+      ),
+      onChanged: (Colaborador? value) {
+        // This is called when the user selects an item.
+        setState(() {
+          colaborador = value;
+        });
+      },
+      items: colaboradorList?.map<DropdownMenuItem<Colaborador>>((Colaborador value) {
+        return DropdownMenuItem<Colaborador>(
+          value: value,
+          child: Text(value.nome),
+        );
+      }).toList(),
+    );
+  }
+
+  void atualizar(){
+    setState(() => {});
+  }
+  
 }
 
 
