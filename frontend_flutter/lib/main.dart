@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 Future<Colaborador> post(String nome, String senha, _MyHomePageState _myHomePageState) async {
   final response = await http.post(
-    Uri.parse('http://localhost:8084'),
+    Uri.parse('http://3.143.118.52:8084'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -38,14 +38,37 @@ Future<List<Colaborador>> get() async {
   }
 }
 
+Future<Colaborador> postAssociaChefe(int idChefe, int idSubordinado, _MyHomePageState _myHomePageState) async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8081'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, int>{
+      'idChefe': idChefe,
+      'idSubordinado': idSubordinado,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    _myHomePageState.limparCampos();
+
+    return Colaborador.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to create colaborador.');
+  }
+}
+
 class Colaborador {
+  final int id;
   final String nome;
   final String senha;
 
-  const Colaborador({required this.nome, required this.senha});
+  const Colaborador({required this.id, required this.nome, required this.senha});
 
   factory Colaborador.fromJson(Map<String, dynamic> json) {
     return Colaborador(
+      id : json['id'],
       nome: json['nome'],
       senha: json['senha'],
     );
@@ -82,12 +105,14 @@ class MyHomePage extends StatefulWidget {
 }
 List<Colaborador>? colaboradorList;
 
-class _MyHomePageState extends State<MyHomePage> {
-  final GlobalKey<_DropdownButtonExampleState> _key = GlobalKey();
 
-  int _counter = 0;
+class _MyHomePageState extends State<MyHomePage> {
+
   String? _nome;
   String? _senha;
+  Colaborador? chefe;
+  Colaborador? subordinado;
+
 
   final nomeController = TextEditingController();
   final senhaController = TextEditingController();
@@ -98,26 +123,20 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   void _salvar() {
     _nome = nomeController.text;
     _senha = senhaController.text;
 
     post(_nome!, _senha!, this);
-    _counter = 0;
   }
-  var dropdown =  const DropdownButtonExample();
+  
+  void _associaChefe() {
+    postAssociaChefe(chefe!.id, subordinado!.id, this);
+  }
 
   @override
   Widget build(BuildContext context) {
-    
     carregaLista();
-
 
     return Scaffold(
       appBar: AppBar(
@@ -131,13 +150,6 @@ class _MyHomePageState extends State<MyHomePage> {
           
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
             TextField(
                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -173,21 +185,80 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
               )
             ),
-            dropdown,
+            MenuAnchor(
+              builder:
+                  (BuildContext context, MenuController controller, Widget? child) {
+                return IconButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  icon: const Icon(Icons.more_horiz),
+                  tooltip: 'Show menu',
+                );
+              },
+              menuChildren: List<MenuItemButton>.generate(
+                colaboradorList!.length,
+                (int index) => MenuItemButton(
+                  onPressed: () =>
+                      selecioneiChefe(index),
+                  child: Text(colaboradorList![index].nome),
+                ),
+              ),
+            ),
+            MenuAnchor(
+              builder:
+                  (BuildContext context, MenuController controller, Widget? child) {
+                return IconButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  icon: const Icon(Icons.more_horiz),
+                  tooltip: 'Show menu',
+                );
+              },
+              menuChildren: List<MenuItemButton>.generate(
+                colaboradorList!.length,
+                (int index) => MenuItemButton(
+                  onPressed: () =>
+                      selecioneiSubordinado(index),
+                  child: Text(colaboradorList![index].nome),
+                ),
+              ),
+            ),
+            TextButton(
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+              ),
+              onPressed: _associaChefe,
+              child: Text('Associar Chefe'),
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ), 
     );
   }
-  
+
+  void selecioneiChefe(int index){
+    setState(() => chefe = colaboradorList?[index]);
+  } 
+
+  void selecioneiSubordinado(int index){
+    setState(() => subordinado = colaboradorList?[index]);
+  } 
+
   void limparCampos() {
     nomeController.text = '';
     senhaController.text = '';
+    chefe = null;
+    subordinado = null;
     carregaLista();
   }
 
@@ -198,54 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void lista(List<Colaborador> lista){
-    setState(() => colaboradorList = lista);
-    _key.currentState?.atualizar();
-  }
-}
-
-class DropdownButtonExample extends StatefulWidget {
-
-  const DropdownButtonExample({super.key});
-
-  @override
-  State<DropdownButtonExample> createState() => _DropdownButtonExampleState();
-  
-
-}
-
-class _DropdownButtonExampleState extends State<DropdownButtonExample> {
-  Colaborador? colaborador = colaboradorList?.first;
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<Colaborador>(
-      value: colaborador,
-      icon: const Icon(Icons.arrow_downward),
-      elevation: 16,
-      style: const TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 2,
-        color: Colors.deepPurpleAccent,
-      ),
-      onChanged: (Colaborador? value) {
-        // This is called when the user selects an item.
-        setState(() {
-          colaborador = value;
-        });
-      },
-      items: colaboradorList?.map<DropdownMenuItem<Colaborador>>((Colaborador value) {
-        return DropdownMenuItem<Colaborador>(
-          value: value,
-          child: Text(value.nome),
-        );
-      }).toList(),
-    );
-  }
-
-  void atualizar(){
-    setState(() => {});
+   setState(() => colaboradorList = lista);
   }
   
 }
-
-
