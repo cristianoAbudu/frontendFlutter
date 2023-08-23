@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 Future<Colaborador> post(String nome, String senha, _MyHomePageState _myHomePageState) async {
   final response = await http.post(
-    Uri.parse('http://3.143.118.52:8084'),
+    Uri.parse('http://localhost:8084'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -40,7 +40,7 @@ Future<List<Colaborador>> get() async {
 
 Future<Colaborador> postAssociaChefe(int idChefe, int idSubordinado, _MyHomePageState _myHomePageState) async {
   final response = await http.post(
-    Uri.parse('http://localhost:8081'),
+    Uri.parse('http://localhost:8081/associaChefe'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -48,6 +48,7 @@ Future<Colaborador> postAssociaChefe(int idChefe, int idSubordinado, _MyHomePage
       'idChefe': idChefe,
       'idSubordinado': idSubordinado,
     }),
+
   );
 
   if (response.statusCode == 200) {
@@ -128,15 +129,21 @@ class _MyHomePageState extends State<MyHomePage> {
     _senha = senhaController.text;
 
     post(_nome!, _senha!, this);
+    precisaRecarregar = true;
   }
   
   void _associaChefe() {
     postAssociaChefe(chefe!.id, subordinado!.id, this);
+    precisaRecarregar = true;
   }
+  bool precisaRecarregar = true;
 
   @override
   Widget build(BuildContext context) {
-    carregaLista();
+    if(precisaRecarregar){
+      carregaLista();
+      precisaRecarregar = false;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -269,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void lista(List<Colaborador> lista){
-   setState(() => colaboradorList = lista);
+    setState(() => colaboradorList = lista);
   }
   
 }
