@@ -15,7 +15,7 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-List<Colaborador>? colaboradorList;
+List<Colaborador>? colaboradorList = [];
 
 class _MyHomePageState extends State<MyHomePage> {
 
@@ -180,7 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void carregaLista(){
-    get().then(
+    get(this).then(
       (value) => lista(value)
     );
   }
@@ -210,13 +210,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<List<Colaborador>> get() async {
+  Future<List<Colaborador>> get(_MyHomePageState _myHomePageState) async {
 
     final response = await http
         .get(Uri.parse('http://localhost:8082'));
 
     if (response.statusCode == 200) {
-      return List<Colaborador>.from( json.decode(response.body) .map( (x) => Colaborador.fromJson(x)));
+      _myHomePageState.setState(() {});
+      return List<Colaborador>.from( json.decode(response.body) .map( (x) => Colaborador.fromJson(x)));;
 
     } else {
       throw Exception('Failed to load colaborador');
