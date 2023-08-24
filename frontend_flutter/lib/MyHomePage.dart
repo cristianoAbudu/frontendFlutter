@@ -1,7 +1,6 @@
 import 'Colaborador.dart';
 import 'main.dart';
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -95,8 +94,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemBuilder: (context, index) {
                     final item = colaboradorList?[index];
                     if(item!=null){
+                      String label = item!.nome;
+                      if( item!.chefe != null ){
+                          label = label + " chefe: "+ item.chefe!.nome;
+                      }
                       return ListTile(
-                        title: Text(item!.nome)
+                        title: Text(label)
                       );
                     }
                   },
@@ -191,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Colaborador> post(String nome, String senha, _MyHomePageState _myHomePageState) async {
     final response = await http.post(
-      Uri.parse('http://localhost:8084'),
+      Uri.parse('http://192.168.3.101:8084'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -213,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<List<Colaborador>> get(_MyHomePageState _myHomePageState) async {
 
     final response = await http
-        .get(Uri.parse('http://localhost:8082'));
+        .get(Uri.parse('http://192.168.3.101:8082'));
 
     if (response.statusCode == 200) {
       _myHomePageState.setState(() {});
@@ -226,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Colaborador> postAssociaChefe(int idChefe, int idSubordinado, _MyHomePageState _myHomePageState) async {
     final response = await http.post(
-      Uri.parse('http://localhost:8081/associaChefe'),
+      Uri.parse('http://192.168.3.101:8081/associaChefe'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
