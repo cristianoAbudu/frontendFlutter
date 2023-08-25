@@ -3,7 +3,7 @@ import 'main.dart';
 import 'MyHomePage.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp();
 
   @override
   Widget build(BuildContext context) {
@@ -11,10 +11,8 @@ class MyApp extends StatelessWidget {
       title: 'Frontend flutter',
       theme: ThemeData(
         
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Cadastro de colaboradores'),
+      home: const MyHomePage( title: ''),
     );
   }
 }

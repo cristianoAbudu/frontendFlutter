@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({required this.title});
 
   final String title;
 
@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.background,
         
         title: Text(widget.title),
       ),
@@ -102,64 +102,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         title: Text(label)
                       );
                     }
+                    return ListTile(
+                        title: Text('')
+                      );
                   },
               )
             ),
-            MenuAnchor(
-              builder:
-                  (BuildContext context, MenuController controller, Widget? child) {
-                return IconButton(
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  icon: const Icon(Icons.more_horiz),
-                  tooltip: 'Show menu',
-                );
-              },
-              menuChildren: List<MenuItemButton>.generate(
-                colaboradorList!.length,
-                (int index) => MenuItemButton(
-                  onPressed: () =>
-                      selecioneiChefe(index),
-                  child: Text(colaboradorList![index].nome),
-                ),
-              ),
-            ),
-            MenuAnchor(
-              builder:
-                  (BuildContext context, MenuController controller, Widget? child) {
-                return IconButton(
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  icon: const Icon(Icons.more_horiz),
-                  tooltip: 'Show menu',
-                );
-              },
-              menuChildren: List<MenuItemButton>.generate(
-                colaboradorList!.length,
-                (int index) => MenuItemButton(
-                  onPressed: () =>
-                      selecioneiSubordinado(index),
-                  child: Text(colaboradorList![index].nome),
-                ),
-              ),
-            ),
-            TextButton(
-              style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-              ),
-              onPressed: _associaChefe,
-              child: Text('Associar Chefe'),
-            )
           ],
         ),
       ), 
@@ -194,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Colaborador> post(String nome, String senha, _MyHomePageState _myHomePageState) async {
     final response = await http.post(
-      Uri.parse('http://192.168.3.101:8084'),
+      Uri.parse('http://192.168.2.1:8084'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -216,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<List<Colaborador>> get(_MyHomePageState _myHomePageState) async {
 
     final response = await http
-        .get(Uri.parse('http://192.168.3.101:8082'));
+        .get(Uri.parse('http://192.168.2.1:8082'));
 
     if (response.statusCode == 200) {
       _myHomePageState.setState(() {});
@@ -229,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Colaborador> postAssociaChefe(int idChefe, int idSubordinado, _MyHomePageState _myHomePageState) async {
     final response = await http.post(
-      Uri.parse('http://192.168.3.101:8081/associaChefe'),
+      Uri.parse('http://192.168.2.1:8081/associaChefe'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
