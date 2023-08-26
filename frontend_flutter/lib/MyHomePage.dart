@@ -3,8 +3,6 @@ import 'main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/material.dart';
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({required this.title});
@@ -108,15 +106,50 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
               )
             ),
-          ],
-        ),
-      ), 
-    );
+            PopupMenuButton<Colaborador>(
+              onSelected: (newValue) { // add this property
+                setState(() {
+                  chefe = newValue; // it gives the value which is selected
+                });
+              },
+              initialValue: chefe,
+              itemBuilder: (BuildContext context) => 
+                colaboradorList!
+                  .map((item) => PopupMenuItem<Colaborador>(
+                    value: item,
+                    child: Text(
+                      item.nome,
+                    ),
+                  )
+                ).toList(),
+            ),
+            PopupMenuButton<Colaborador>(
+              onSelected: (newValue) { // add this property
+                setState(() {
+                  subordinado = newValue; // it gives the value which is selected
+                });
+              },
+              initialValue: chefe,
+              itemBuilder: (BuildContext context) => 
+                colaboradorList!
+                  .map((item) => PopupMenuItem<Colaborador>(
+                    value: item,
+                    child: Text(
+                      item.nome,
+                    ),
+                  )
+                ).toList(),
+            ),
+            TextButton(
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+              ),
+              onPressed: _associaChefe,
+              child: Text('Associar Chefe'),
+            )
+      ], 
+    )));
   }
-
-  void selecioneiChefe(int index){
-    setState(() => chefe = colaboradorList?[index]);
-  } 
 
   void selecioneiSubordinado(int index){
     setState(() => subordinado = colaboradorList?[index]);
@@ -142,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Colaborador> post(String nome, String senha, _MyHomePageState _myHomePageState) async {
     final response = await http.post(
-      Uri.parse('http://192.168.2.1:8084'),
+      Uri.parse('http://192.168.68.108:8084'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -164,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<List<Colaborador>> get(_MyHomePageState _myHomePageState) async {
 
     final response = await http
-        .get(Uri.parse('http://192.168.2.1:8082'));
+        .get(Uri.parse('http://192.168.68.108:8082'));
 
     if (response.statusCode == 200) {
       _myHomePageState.setState(() {});
@@ -177,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Colaborador> postAssociaChefe(int idChefe, int idSubordinado, _MyHomePageState _myHomePageState) async {
     final response = await http.post(
-      Uri.parse('http://192.168.2.1:8081/associaChefe'),
+      Uri.parse('http://192.168.68.108:8081/associaChefe'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
